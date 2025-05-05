@@ -1,30 +1,43 @@
 import subprocess
 import os
 import vk_api
-from telegram import Bot, InputMediaPhoto
 import asyncio
+import threading
+import traceback
+
+from telegram import Bot, InputMediaPhoto, Update
+from telegram.ext import Application, CommandHandler, ContextTypes
 
 # 🔐 Настройки
-ERROR_RECIPIENT_ID = 7494459560  # ←  ЧАТ НА СЛУЧАЙ ОШИБКИ БОТА
+ERROR_RECIPIENT_ID = 7494459560  # ← Твой Telegram user_id (личный)
 VK_TOKEN = 'vk1.a.owNeaTIqSRvw5P4T5yz6L9Zjm4-ce-E8te8VPxyt43VxKYf_cVl0IgOyvPjii-z8wU1E_Bp9L_NIDJIH1hdG_WMCxyb0tqCxkzAJzXYO0ZDj5BSSREAZlF9UnOltWAuOb9l92XcQ1NgD-TwWd8OHwQfGQG-kK3JqHCapwiyF_mHbDjdmdqvOVWpJZGU-4lJ-xRHgnMWk_hfkcVmJJfx2fQ'
-VK_GROUP_ID = -222146821
+VK_GROUP_ID = -188338243
 TG_BOT_TOKEN = '7534487091:AAFlT5m24S8rS5ocnNvQczRr2KcDDUIGhD4'
 TG_CHAT_ID = '-4704252735'
 VIDEO_DIR = "temp_videos"
 
-# Авторизация VK
+# Инициализация
 vk_session = vk_api.VkApi(token=VK_TOKEN)
 vk = vk_session.get_api()
-
-# Telegram bot
 bot = Bot(token=TG_BOT_TOKEN)
-
-# Отправленные post_id
 sent_post_ids = set()
-
-# Создаем папку для видео
 os.makedirs(VIDEO_DIR, exist_ok=True)
 
+# 🔁 Команда /restart
+async def restart_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id == ERROR_RECIPIENT_ID:
+        await update.message.reply_text("♻️ Перезапускаю бота...")
+        subprocess.run(["systemctl", "restart", "vkbot"])
+    else:
+        await update.message.reply_text("❌ У тебя нет прав.")
+
+# 📡 Telegram polling
+def setup_command_bot():
+    app = Application.builder().token(TG_BOT_TOKEN).build()
+    app.add_handler(CommandHandler("restart", restart_command))
+    app.run_polling()
+
+# 📥 Получение поста
 def get_latest_vk_post():
     try:
         response = vk.wall.get(owner_id=VK_GROUP_ID, count=1)
@@ -33,6 +46,7 @@ def get_latest_vk_post():
         print(f"Ошибка получения поста: {e}")
         return None
 
+# 🖼 Извлечение медиа
 def extract_media_from_post(post):
     photos = []
     videos = []
@@ -53,6 +67,7 @@ def extract_media_from_post(post):
             videos.append(link)
     return photos, videos
 
+# 📤 Отправка в Telegram
 async def send_to_telegram(text, photos, videos):
     try:
         if photos:
@@ -70,7 +85,7 @@ async def send_to_telegram(text, photos, videos):
             for i, video_url in enumerate(videos):
                 filename = os.path.join(VIDEO_DIR, f"video_{i}.mp4")
                 print(f"🎥 Скачиваем: {video_url}")
-                result = subprocess.run([
+                subprocess.run([
                     "yt-dlp", "--max-filesize", "49M", "-f", "mp4", "-o", filename, video_url
                 ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
@@ -97,8 +112,9 @@ async def send_to_telegram(text, photos, videos):
         try:
             await bot.send_message(chat_id=ERROR_RECIPIENT_ID, text=error_text)
         except Exception as inner_err:
-            print(f"⚠️ Не удалось отправить ошибку в ЛС: {inner_err}")
+            print(f"⚠️ Ошибка при отправке ошибки в ЛС: {inner_err}")
 
+# 🔄 Основной цикл
 async def main():
     print("🔄 Бот запущен. Проверка каждые 60 секунд...")
     await bot.send_message(chat_id=ERROR_RECIPIENT_ID, text="✅ Бот запущен и работает")
@@ -115,13 +131,14 @@ async def main():
                 sent_post_ids.add(post_id)
         await asyncio.sleep(60)
 
-
+# 🧠 Запуск
 if __name__ == "__main__":
+    threading.Thread(target=setup_command_bot, daemon=True).start()
+
     async def wrapper():
         try:
             await main()
         except Exception as e:
-            import traceback
             tb = traceback.format_exc()
             print(f"❗ Глобальная ошибка:\n{tb}")
             try:
