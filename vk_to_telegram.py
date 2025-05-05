@@ -9,33 +9,32 @@ from telegram import Bot, InputMediaPhoto, Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
 # === 🔐 Настройки ===
-ERROR_RECIPIENT_ID = 7494459560  # ← Твой Telegram user_id
-VK_TOKEN = 'vk1.a.owNeaTIqSRvw5P4T5yz6L9Zjm4-ce-E8te8VPxyt43VxKYf_cVl0IgOyvPjii-z8wU1E_Bp9L_NIDJIH1hdG_WMCxyb0tqCxkzAJzXYO0ZDj5BSSREAZlF9UnOltWAuOb9l92XcQ1NgD-TwWd8OHwQfGQG-kK3JqHCapwiyF_mHbDjdmdqvOVWpJZGU-4lJ-xRHgnMWk_hfkcVmJJfx2fQ'
+ERROR_RECIPIENT_ID = 7494459560
+VK_TOKEN = '...'  # твой VK токен
 VK_GROUP_ID = -188338243
-TG_BOT_TOKEN = '7534487091:AAFlT5m24S8rS5ocnNvQczRr2KcDDUIGhD4'
+TG_BOT_TOKEN = '...'  # токен телеграм-бота
 TG_CHAT_ID = '-4704252735'
 VIDEO_DIR = "temp_videos"
 
-# === 📦 Состояние ===
+# === Состояние ===
 sent_post_ids = set()
 is_paused = False
 last_post_id = None
 start_time = time.time()
 
-# === 🤖 Telegram Bot и VK ===
+# === VK и Bot ===
 bot = Bot(token=TG_BOT_TOKEN)
 vk_session = vk_api.VkApi(token=VK_TOKEN)
 vk = vk_session.get_api()
 os.makedirs(VIDEO_DIR, exist_ok=True)
 
-# === ⏱ Аптайм ===
 def get_uptime():
     seconds = int(time.time() - start_time)
     mins, secs = divmod(seconds, 60)
     hours, mins = divmod(mins, 60)
     return f"{hours}ч {mins}м {secs}с"
 
-# === 📡 Команды ===
+# === Команды ===
 async def restart_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id == ERROR_RECIPIENT_ID:
         await update.message.reply_text("♻️ Перезапускаю бота...")
@@ -65,7 +64,7 @@ async def lastpost_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text("❔ Ещё ничего не отправлялось.")
 
-# === 🔁 Основной цикл ===
+# === VK-посты ===
 def get_latest_vk_post():
     try:
         response = vk.wall.get(owner_id=VK_GROUP_ID, count=1)
@@ -125,6 +124,7 @@ async def send_to_telegram(text, photos, videos):
         except Exception as inner_err:
             print(f"⚠️ Ошибка отправки ошибки: {inner_err}")
 
+# === Основной цикл ===
 async def main_loop():
     global last_post_id
     await bot.send_message(chat_id=ERROR_RECIPIENT_ID, text="✅ Бот запущен")
@@ -132,7 +132,6 @@ async def main_loop():
         if is_paused:
             await asyncio.sleep(10)
             continue
-
         post = get_latest_vk_post()
         if post:
             post_id = post['id']
@@ -144,9 +143,8 @@ async def main_loop():
                 last_post_id = post_id
         await asyncio.sleep(60)
 
-# === 🚀 Запуск ===
-# 🚀 Запуск
-async def main():
+# === Запуск ===
+async def run_all():
     app = ApplicationBuilder().token(TG_BOT_TOKEN).build()
 
     app.add_handler(CommandHandler("restart", restart_command))
@@ -155,13 +153,19 @@ async def main():
     app.add_handler(CommandHandler("resume", resume_command))
     app.add_handler(CommandHandler("lastpost", lastpost_command))
 
-    # Запускаем VK-цикл после инициализации бота
+    # Запуск loop после старта бота
     async def after_start(app):
         asyncio.create_task(main_loop())
 
     app.post_init = after_start
-
     await app.run_polling()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    # Специальный обход ошибки "event loop already running"
+    try:
+        import nest_asyncio
+        nest_asyncio.apply()
+    except:
+        pass
+
+    asyncio.run(run_all())
