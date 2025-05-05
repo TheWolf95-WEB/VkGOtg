@@ -8,7 +8,7 @@ import time
 from telegram import Bot, InputMediaPhoto, Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
-# 🔐 Настройки
+# === 🔐 Настройки ===
 ERROR_RECIPIENT_ID = 7494459560  # ← Твой Telegram user_id
 VK_TOKEN = 'vk1.a.owNeaTIqSRvw5P4T5yz6L9Zjm4-ce-E8te8VPxyt43VxKYf_cVl0IgOyvPjii-z8wU1E_Bp9L_NIDJIH1hdG_WMCxyb0tqCxkzAJzXYO0ZDj5BSSREAZlF9UnOltWAuOb9l92XcQ1NgD-TwWd8OHwQfGQG-kK3JqHCapwiyF_mHbDjdmdqvOVWpJZGU-4lJ-xRHgnMWk_hfkcVmJJfx2fQ'
 VK_GROUP_ID = -188338243
@@ -16,32 +16,26 @@ TG_BOT_TOKEN = '7534487091:AAFlT5m24S8rS5ocnNvQczRr2KcDDUIGhD4'
 TG_CHAT_ID = '-4704252735'
 VIDEO_DIR = "temp_videos"
 
-# Состояние
+# === 📦 Состояние ===
 sent_post_ids = set()
 is_paused = False
 last_post_id = None
 start_time = time.time()
 
-# Telegram Bot
+# === 🤖 Telegram Bot и VK ===
 bot = Bot(token=TG_BOT_TOKEN)
-
-# VK API
 vk_session = vk_api.VkApi(token=VK_TOKEN)
 vk = vk_session.get_api()
-
-# Папка для видео
 os.makedirs(VIDEO_DIR, exist_ok=True)
 
-# Сколько прошло с запуска
-
+# === ⏱ Аптайм ===
 def get_uptime():
     seconds = int(time.time() - start_time)
     mins, secs = divmod(seconds, 60)
     hours, mins = divmod(mins, 60)
     return f"{hours}ч {mins}м {secs}с"
 
-# Команды Telegram
-
+# === 📡 Команды ===
 async def restart_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id == ERROR_RECIPIENT_ID:
         await update.message.reply_text("♻️ Перезапускаю бота...")
@@ -71,8 +65,7 @@ async def lastpost_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text("❔ Ещё ничего не отправлялось.")
 
-# Основной цикл
-
+# === 🔁 Основной цикл ===
 def get_latest_vk_post():
     try:
         response = vk.wall.get(owner_id=VK_GROUP_ID, count=1)
@@ -151,32 +144,18 @@ async def main_loop():
                 last_post_id = post_id
         await asyncio.sleep(60)
 
-# Старт
-async def wrapper():
-    try:
-        app = ApplicationBuilder().token(TG_BOT_TOKEN).build()
+# === 🚀 Запуск ===
+def main():
+    app = ApplicationBuilder().token(TG_BOT_TOKEN).build()
 
-        app.add_handler(CommandHandler("restart", restart_command))
-        app.add_handler(CommandHandler("status", status_command))
-        app.add_handler(CommandHandler("pause", pause_command))
-        app.add_handler(CommandHandler("resume", resume_command))
-        app.add_handler(CommandHandler("lastpost", lastpost_command))
+    app.add_handler(CommandHandler("restart", restart_command))
+    app.add_handler(CommandHandler("status", status_command))
+    app.add_handler(CommandHandler("pause", pause_command))
+    app.add_handler(CommandHandler("resume", resume_command))
+    app.add_handler(CommandHandler("lastpost", lastpost_command))
 
-        # 🟢 Запускаем основной цикл в фоне
-        asyncio.create_task(main_loop())
-
-        # 🔵 Запускаем Telegram polling (блокирующий)
-        await app.run_polling()
-
-    except Exception as e:
-        tb = traceback.format_exc()
-        print(f"❗ Глобальная ошибка:\n{tb}")
-        try:
-            await bot.send_message(chat_id=ERROR_RECIPIENT_ID, text=f"❗ Ошибка:\n{tb[:4000]}")
-        except Exception as err:
-            print(f"⚠️ Ошибка при отправке ошибки: {err}")
-
-
+    asyncio.create_task(main_loop())
+    app.run_polling()
 
 if __name__ == "__main__":
-    asyncio.run(wrapper())
+    main()
