@@ -101,6 +101,8 @@ async def send_to_telegram(text, photos, videos):
 
 async def main():
     print("🔄 Бот запущен. Проверка каждые 60 секунд...")
+    await bot.send_message(chat_id=ERROR_RECIPIENT_ID, text="✅ Бот запущен и работает")
+
     while True:
         post = get_latest_vk_post()
         if post:
@@ -112,6 +114,7 @@ async def main():
                 await send_to_telegram(text, photos, videos)
                 sent_post_ids.add(post_id)
         await asyncio.sleep(60)
+
 
 if __name__ == "__main__":
     async def wrapper():
