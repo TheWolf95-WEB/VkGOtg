@@ -115,14 +115,16 @@ async def main():
         await asyncio.sleep(60)
 
 if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except Exception as e:
-        import traceback
-        tb = traceback.format_exc()
-        print(f"❗ Глобальная ошибка:\n{tb}")
+    async def wrapper():
         try:
-            asyncio.run(bot.send_message(chat_id=ERROR_RECIPIENT_ID, text=f"❗ Глобальная ошибка:\n{tb[:4000]}"))
-        except Exception as err:
-            print(f"⚠️ Ошибка при отправке глобальной ошибки: {err}")
+            await main()
+        except Exception as e:
+            import traceback
+            tb = traceback.format_exc()
+            print(f"❗ Глобальная ошибка:\n{tb}")
+            try:
+                await bot.send_message(chat_id=ERROR_RECIPIENT_ID, text=f"❗ Глобальная ошибка:\n{tb[:4000]}")
+            except Exception as err:
+                print(f"⚠️ Ошибка при отправке глобальной ошибки: {err}")
 
+    asyncio.run(wrapper())
