@@ -91,13 +91,13 @@ async def send_to_telegram(text, photos, videos):
         if not photos and not videos:
             await bot.send_message(chat_id=TG_CHAT_ID, text=text[:4096])
 
-except Exception as e:
-    error_text = f"❗ Ошибка отправки в Telegram:\n{e}"
-    print(error_text)
-    try:
-        await bot.send_message(chat_id=ERROR_RECIPIENT_ID, text=error_text)
-    except Exception as inner_err:
-        print(f"⚠️ Не удалось отправить ошибку в ЛС: {inner_err}")
+    except Exception as e:
+        error_text = f"❗ Ошибка отправки в Telegram:\n{e}"
+        print(error_text)
+        try:
+            await bot.send_message(chat_id=ERROR_RECIPIENT_ID, text=error_text)
+        except Exception as inner_err:
+            print(f"⚠️ Не удалось отправить ошибку в ЛС: {inner_err}")
 
 async def main():
     print("🔄 Бот запущен. Проверка каждые 60 секунд...")
