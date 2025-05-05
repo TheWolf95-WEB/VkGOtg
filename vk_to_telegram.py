@@ -5,6 +5,7 @@ from telegram import Bot, InputMediaPhoto
 import asyncio
 
 # 🔐 Настройки
+ERROR_RECIPIENT_ID = 7494459560  # ←  ЧАТ НА СЛУЧАЙ ОШИБКИ БОТА
 VK_TOKEN = 'vk1.a.owNeaTIqSRvw5P4T5yz6L9Zjm4-ce-E8te8VPxyt43VxKYf_cVl0IgOyvPjii-z8wU1E_Bp9L_NIDJIH1hdG_WMCxyb0tqCxkzAJzXYO0ZDj5BSSREAZlF9UnOltWAuOb9l92XcQ1NgD-TwWd8OHwQfGQG-kK3JqHCapwiyF_mHbDjdmdqvOVWpJZGU-4lJ-xRHgnMWk_hfkcVmJJfx2fQ'
 VK_GROUP_ID = -188338243
 TG_BOT_TOKEN = '7534487091:AAFlT5m24S8rS5ocnNvQczRr2KcDDUIGhD4'
@@ -91,7 +92,13 @@ async def send_to_telegram(text, photos, videos):
             await bot.send_message(chat_id=TG_CHAT_ID, text=text[:4096])
 
     except Exception as e:
-        print(f"Ошибка отправки в Telegram: {e}")
+    error_text = f"❗ Ошибка отправки в Telegram:\n{e}"
+    print(error_text)
+    try:
+        await bot.send_message(chat_id=ERROR_RECIPIENT_ID, text=error_text)
+    except Exception as inner_err:
+        print(f"⚠️ Не удалось отправить ошибку в ЛС: {inner_err}")
+
 
 async def main():
     print("🔄 Бот запущен. Проверка каждые 60 секунд...")
@@ -108,4 +115,14 @@ async def main():
         await asyncio.sleep(60)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except Exception as e:
+        import traceback
+        tb = traceback.format_exc()
+        print(f"❗ Глобальная ошибка:\n{tb}")
+        try:
+            asyncio.run(bot.send_message(chat_id=ERROR_RECIPIENT_ID, text=f"❗ Глобальная ошибка:\n{tb[:4000]}"))
+        except Exception as err:
+            print(f"⚠️ Ошибка при отправке глобальной ошибки: {err}")
+
