@@ -130,12 +130,15 @@ async def wrapper():
         app = ApplicationBuilder().token(TG_BOT_TOKEN).build()
         app.add_handler(CommandHandler("restart", restart_command))
 
-        # Запускаем и Telegram polling, и основной цикл одновременно
-        await asyncio.gather(
-            app.start(),
-            app.updater.start_polling(),
-            main_loop()
-        )
+        print("📡 Telegram polling запускается...")
+
+        await app.initialize()
+        await app.start()
+        await app.updater.start_polling()
+
+        # Параллельно запускаем основную логику
+        await main_loop()
+
     except Exception as e:
         tb = traceback.format_exc()
         print(f"❗ Глобальная ошибка:\n{tb}")
@@ -143,6 +146,7 @@ async def wrapper():
             await bot.send_message(chat_id=ERROR_RECIPIENT_ID, text=f"❗ Глобальная ошибка:\n{tb[:4000]}")
         except Exception as err:
             print(f"⚠️ Ошибка при отправке глобальной ошибки: {err}")
+
 
 # 🚀 Запуск
 if __name__ == "__main__":
