@@ -162,14 +162,13 @@ async def wrapper():
         app.add_handler(CommandHandler("resume", resume_command))
         app.add_handler(CommandHandler("lastpost", lastpost_command))
 
-        await app.initialize()
-        await app.start()
-        await app.updater.start_polling()
+        # 🔁 Запускаем Telegram polling и main_loop параллельно
+        async def bot_tasks():
+            await main_loop()
 
-        # ✅ запускаем параллельно и polling, и основной цикл
         await asyncio.gather(
-            main_loop(),
-            app.updater._running.wait()  # ✅ правильный способ ждать polling
+            app.run_polling(),
+            bot_tasks()
         )
 
     except Exception as e:
@@ -178,7 +177,7 @@ async def wrapper():
         try:
             await bot.send_message(chat_id=ERROR_RECIPIENT_ID, text=f"❗ Ошибка:\n{tb[:4000]}")
         except Exception as err:
-            print(f"⚠️ Ошибка отправки ошибки: {err}")
+            print(f"⚠️ Ошибка при отправке ошибки: {err}")
 
 
 if __name__ == "__main__":
