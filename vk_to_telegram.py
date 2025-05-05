@@ -8,11 +8,11 @@ import time
 from telegram import Bot, InputMediaPhoto, Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
-# === 🔐 Настройки ===
+# === Настройки ===
 ERROR_RECIPIENT_ID = 7494459560
-VK_TOKEN = 'vk1.a.owNeaTIqSRvw5P4T5yz6L9Zjm4-ce-E8te8VPxyt43VxKYf_cVl0IgOyvPjii-z8wU1E_Bp9L_NIDJIH1hdG_WMCxyb0tqCxkzAJzXYO0ZDj5BSSREAZlF9UnOltWAuOb9l92XcQ1NgD-TwWd8OHwQfGQG-kK3JqHCapwiyF_mHbDjdmdqvOVWpJZGU-4lJ-xRHgnMWk_hfkcVmJJfx2fQ'
+VK_TOKEN = '...'  # ← твой VK токен
 VK_GROUP_ID = -188338243
-TG_BOT_TOKEN = '7534487091:AAFlT5m24S8rS5ocnNvQczRr2KcDDUIGhD4'
+TG_BOT_TOKEN = '...'  # ← токен телеграм-бота
 TG_CHAT_ID = '-4704252735'
 VIDEO_DIR = "temp_videos"
 
@@ -28,6 +28,7 @@ vk_session = vk_api.VkApi(token=VK_TOKEN)
 vk = vk_session.get_api()
 os.makedirs(VIDEO_DIR, exist_ok=True)
 
+# === Аптайм ===
 def get_uptime():
     seconds = int(time.time() - start_time)
     mins, secs = divmod(seconds, 60)
@@ -144,28 +145,20 @@ async def main_loop():
         await asyncio.sleep(60)
 
 # === Запуск ===
-async def run_all():
+def main():
     app = ApplicationBuilder().token(TG_BOT_TOKEN).build()
-
     app.add_handler(CommandHandler("restart", restart_command))
     app.add_handler(CommandHandler("status", status_command))
     app.add_handler(CommandHandler("pause", pause_command))
     app.add_handler(CommandHandler("resume", resume_command))
     app.add_handler(CommandHandler("lastpost", lastpost_command))
 
-    # Запуск loop после старта бота
-    async def after_start(app):
+    # 👇 Здесь запускаем loop после старта polling
+    async def run():
         asyncio.create_task(main_loop())
+        await app.run_polling()
 
-    app.post_init = after_start
-    await app.run_polling()
+    asyncio.get_event_loop().run_until_complete(run())
 
 if __name__ == "__main__":
-    # Специальный обход ошибки "event loop already running"
-    try:
-        import nest_asyncio
-        nest_asyncio.apply()
-    except:
-        pass
-
-    asyncio.run(run_all())
+    main()
