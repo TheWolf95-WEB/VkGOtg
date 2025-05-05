@@ -155,6 +155,7 @@ async def main_loop():
 async def wrapper():
     try:
         app = ApplicationBuilder().token(TG_BOT_TOKEN).build()
+
         app.add_handler(CommandHandler("restart", restart_command))
         app.add_handler(CommandHandler("status", status_command))
         app.add_handler(CommandHandler("pause", pause_command))
@@ -165,7 +166,11 @@ async def wrapper():
         await app.start()
         await app.updater.start_polling()
 
-        await main_loop()
+        # ✅ запускаем параллельно и polling, и основной цикл
+        await asyncio.gather(
+            main_loop(),
+            app.updater.wait()  # ждёт завершения polling
+        )
 
     except Exception as e:
         tb = traceback.format_exc()
@@ -174,6 +179,7 @@ async def wrapper():
             await bot.send_message(chat_id=ERROR_RECIPIENT_ID, text=f"❗ Ошибка:\n{tb[:4000]}")
         except Exception as err:
             print(f"⚠️ Ошибка отправки ошибки: {err}")
+
 
 if __name__ == "__main__":
     asyncio.run(wrapper())
