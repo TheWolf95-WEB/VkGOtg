@@ -147,18 +147,22 @@ async def main_loop():
 # === Запуск ===
 def main():
     app = ApplicationBuilder().token(TG_BOT_TOKEN).build()
+
     app.add_handler(CommandHandler("restart", restart_command))
     app.add_handler(CommandHandler("status", status_command))
     app.add_handler(CommandHandler("pause", pause_command))
     app.add_handler(CommandHandler("resume", resume_command))
     app.add_handler(CommandHandler("lastpost", lastpost_command))
 
-    # 👇 Здесь запускаем loop после старта polling
-    async def run():
+    # запуск фоновой задачи
+    async def after_start(app):
         asyncio.create_task(main_loop())
-        await app.run_polling()
 
-    asyncio.get_event_loop().run_until_complete(run())
+    app.post_init = after_start
+
+    # без await — чтобы не создавать конфликт loop'ов
+    app.run_polling()
+
 
 if __name__ == "__main__":
     main()
