@@ -10,9 +10,9 @@ from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
 # === Настройки ===
 ERROR_RECIPIENT_ID = 7494459560
-VK_TOKEN = '...'  # ← твой VK токен
+VK_TOKEN = 'vk1.a.owNeaTIqSRvw5P4T5yz6L9Zjm4-ce-E8te8VPxyt43VxKYf_cVl0IgOyvPjii-z8wU1E_Bp9L_NIDJIH1hdG_WMCxyb0tqCxkzAJzXYO0ZDj5BSSREAZlF9UnOltWAuOb9l92XcQ1NgD-TwWd8OHwQfGQG-kK3JqHCapwiyF_mHbDjdmdqvOVWpJZGU-4lJ-xRHgnMWk_hfkcVmJJfx2fQ'
 VK_GROUP_ID = -188338243
-TG_BOT_TOKEN = '...'  # ← токен телеграм-бота
+TG_BOT_TOKEN = '7534487091:AAFlT5m24S8rS5ocnNvQczRr2KcDDUIGhD4'
 TG_CHAT_ID = '-4704252735'
 VIDEO_DIR = "temp_videos"
 
