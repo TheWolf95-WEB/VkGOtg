@@ -145,7 +145,8 @@ async def main_loop():
         await asyncio.sleep(60)
 
 # === 🚀 Запуск ===
-def main():
+# 🚀 Запуск
+async def main():
     app = ApplicationBuilder().token(TG_BOT_TOKEN).build()
 
     app.add_handler(CommandHandler("restart", restart_command))
@@ -154,8 +155,13 @@ def main():
     app.add_handler(CommandHandler("resume", resume_command))
     app.add_handler(CommandHandler("lastpost", lastpost_command))
 
-    asyncio.create_task(main_loop())
-    app.run_polling()
+    # Запускаем VK-цикл после инициализации бота
+    async def after_start(app):
+        asyncio.create_task(main_loop())
+
+    app.post_init = after_start
+
+    await app.run_polling()
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
