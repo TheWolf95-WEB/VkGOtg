@@ -100,6 +100,7 @@ async def send_to_telegram(text, photos, videos):
             print(f"⚠️ Не удалось отправить ошибку в ЛС: {inner_err}")
 
 async def main():
+    raise Exception("🧪 Тестовая ошибка: проверка отправки в ЛС")
     print("🔄 Бот запущен. Проверка каждые 60 секунд...")
     while True:
         post = get_latest_vk_post()
