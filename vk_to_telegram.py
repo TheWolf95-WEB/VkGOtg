@@ -169,7 +169,7 @@ async def wrapper():
         # ✅ запускаем параллельно и polling, и основной цикл
         await asyncio.gather(
             main_loop(),
-            app.updater.wait()  # ждёт завершения polling
+            app.updater._running.wait()  # ✅ правильный способ ждать polling
         )
 
     except Exception as e:
