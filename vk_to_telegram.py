@@ -8,12 +8,15 @@ import time
 from telegram import Bot, InputMediaPhoto, Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
+from dotenv import load_dotenv
+load_dotenv()
+
 # === Настройки ===
-ERROR_RECIPIENT_ID = 7494459560
-VK_TOKEN = 'vk1.a.iEQHhng9SUrSHph6cZL471-kvEI3DS_nZUiDfUnyUIPysSn1S8jYA8x4Xgk4zwKPqXihT7dE6yn-OFcTsctkZ827KeoiYlNGWFf8-hp9K_WV2omUZOug-XJ07b-DvkInqOvSbk8tkAvs9sjcy6h1_Po0ao8x6oPZPS6goRc7UmTie5QnQLHkVQ69T6MjPaCRAUBk9id8jjsmF1rqQp9nlA'
-VK_GROUP_ID = -188338243
-TG_BOT_TOKEN = '7534487091:AAFlT5m24S8rS5ocnNvQczRr2KcDDUIGhD4'
-TG_CHAT_ID = '-1001990222164'
+VK_TOKEN = os.getenv("VK_TOKEN")
+TG_BOT_TOKEN = os.getenv("TG_BOT_TOKEN")
+TG_CHAT_ID = os.getenv("TG_CHAT_ID")
+ERROR_RECIPIENT_ID = int(os.getenv("ERROR_RECIPIENT_ID"))
+VK_GROUP_ID = int(os.getenv("VK_GROUP_ID"))
 VIDEO_DIR = "temp_videos"
 
 # === Состояние ===
