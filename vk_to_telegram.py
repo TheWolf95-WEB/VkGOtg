@@ -10,7 +10,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
 # === Настройки ===
 ERROR_RECIPIENT_ID = 7494459560
-VK_TOKEN = 'vk1.a.owNeaTIqSRvw5P4T5yz6L9Zjm4-ce-E8te8VPxyt43VxKYf_cVl0IgOyvPjii-z8wU1E_Bp9L_NIDJIH1hdG_WMCxyb0tqCxkzAJzXYO0ZDj5BSSREAZlF9UnOltWAuOb9l92XcQ1NgD-TwWd8OHwQfGQG-kK3JqHCapwiyF_mHbDjdmdqvOVWpJZGU-4lJ-xRHgnMWk_hfkcVmJJfx2fQ'
+VK_TOKEN = 'vk1.a.iEQHhng9SUrSHph6cZL471-kvEI3DS_nZUiDfUnyUIPysSn1S8jYA8x4Xgk4zwKPqXihT7dE6yn-OFcTsctkZ827KeoiYlNGWFf8-hp9K_WV2omUZOug-XJ07b-DvkInqOvSbk8tkAvs9sjcy6h1_Po0ao8x6oPZPS6goRc7UmTie5QnQLHkVQ69T6MjPaCRAUBk9id8jjsmF1rqQp9nlA'
 VK_GROUP_ID = -188338243
 TG_BOT_TOKEN = '7534487091:AAFlT5m24S8rS5ocnNvQczRr2KcDDUIGhD4'
 TG_CHAT_ID = '-1001990222164'
